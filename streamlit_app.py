@@ -1,0 +1,50 @@
+import streamlit as st
+import requests
+import json
+
+# Streamlit app title
+st.title("GatesGPT API Query Tool")
+
+# Form to input the question and other parameters
+with st.form("query_form"):
+    question = st.text_input("Question", value="What is the best fertilizer for wheat?")
+    language_options = ["English", "Luganda"]
+    language = st.selectbox("Language", options=language_options, index=0)  # Default to English
+    category_options = ["Animal", "Crop"]
+    category = st.selectbox("Category", options=category_options)
+    sub_category = st.text_input("Sub Category", value="")
+    topic = st.text_input("Topic", value="Fertilization")
+    sub_topic = st.text_input("Sub Topic", value="")
+    location = st.text_input("Location", value="")
+    submitted = st.form_submit_button("Submit")
+
+if submitted:
+    # API URL
+    url = "http://10.120.3.209:8000/query/"
+    
+    # Request headers
+    headers = {
+        "accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    
+    # Request data
+    data = {
+        "question": question,
+        "language": language,
+        "category": category,
+        "sub_category": sub_category or None,
+        "topic": topic,
+        "sub_topic": sub_topic or None,
+        "location": location or None
+    }
+    
+    # Send the POST request
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    
+    if response.status_code == 200:
+        # Display the response
+        st.success("Query successful!")
+        st.json(response.json())
+    else:
+        st.error(f"Failed to query. Status code: {response.status_code}")
