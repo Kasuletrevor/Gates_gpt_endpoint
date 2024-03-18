@@ -9,7 +9,7 @@ st.title("GatesGPT API Query Tool")
 with st.form("query_form"):
     question = st.text_input("Question", value="What is the best fertilizer for wheat?")
     language_options = ["English", "Luganda"]
-    language = st.selectbox("Language", options=language_options, index=0)  # Default to English
+    language = st.selectbox("Language", options=language_options, index=0)
     category_options = ["Animal", "Crop"]
     category = st.selectbox("Category", options=category_options)
     sub_category = st.text_input("Sub Category", value="")
@@ -20,7 +20,7 @@ with st.form("query_form"):
 
 if submitted:
     # API URL
-    url = "http://10.120.3.209:8000/query/"
+    url = "http://35.239.70.68:8000/query/"
     
     # Request headers
     headers = {
@@ -36,7 +36,8 @@ if submitted:
         "sub_category": sub_category or None,
         "topic": topic,
         "sub_topic": sub_topic or None,
-        "location": location or None
+        "location": location or None,
+        "simple_response": False
     }
     
     # Send the POST request
