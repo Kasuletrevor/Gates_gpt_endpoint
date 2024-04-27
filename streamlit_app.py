@@ -21,6 +21,7 @@ with st.form("query_form"):
 if submitted:
     # API URL
     url = "http://35.239.70.68:8000/query/"
+    url = "http://35.232.247.73:8000/query/"
     
     # Request headers
     headers = {
