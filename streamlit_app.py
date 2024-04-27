@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import json
+import ollama
 
 # Streamlit app title
 st.title("GatesGPT API Query Tool")
