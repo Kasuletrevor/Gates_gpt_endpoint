@@ -13,6 +13,30 @@ import replicate
 
 # # Streamlit app title
 # st.title("Enhanced Query Tool with LLaMA")
+import re
+
+def clean_response(response):
+    # Define unwanted phrases
+    unwanted_phrases = [
+        "Sure, I'd be happy to help!",
+        "I'm happy to assist you with that.",
+        "Sure thing!",
+        "Certainly!"
+    ]
+    
+    # Create a regex pattern to match any of the unwanted phrases
+    pattern = re.compile(r'\b(?:' + '|'.join(re.escape(phrase) for phrase in unwanted_phrases) + r')\b', re.IGNORECASE)
+    
+    # Remove the unwanted phrases
+    clean_text = pattern.sub("", response).strip()
+    
+    # Optionally, you can add a step to ensure the first character is capitalized if it became lowercase after removal
+    if clean_text and not clean_text[0].isupper():
+        clean_text = clean_text[0].upper() + clean_text[1:]
+    
+    return clean_text
+
+
 st.title('🦙💬 Llama 2 Agricultural Chatbot')
 
 with st.sidebar:
@@ -47,6 +71,21 @@ def generate_llama_response(user_question, similar_question, best_answer_similar
     prompt = f"Context: Our system answers agricultural questions by performing a semantic search to find the most relevant previously answered questions and answers in our database.\nUser Question: {user_question}\nSimilar Question: {similar_question}\nBest Answer to the Similar Question: {best_answer_similar_question}\nBased on the above, what would be the best response to the user's question? Please provide a concise answer in less than 60 words. "
     # Construct the detailed prompt with context about the task and specifics of the query
     prompt = f"Context: Our system answers agricultural questions by performing a semantic search to find the most relevant previously answered questions and answers in our database.\nUser Question: {user_question}\nSimilar Question: {similar_question}\nBest Answer to the Similar Question: {best_answer_similar_question}\nDirectly based on the above, provide the best concise answer for the user's question without restating the question. Please provide a concise answer in less than 60 words. Provide a direct and practical recommendation suitable for the user's query without any additional explanations or introductions.Start stating the answer directly. e.g The gestation period for a cow is....... Do not tell me how happy you would love to help!"
+    prompt = f"""Context: This is an agricultural advice tool. The system uses previous Q&A data to generate direct and concise responses to user queries.
+        User Question: {user_question}
+        Similar Question: {similar_question}
+        Best Answer to the Similar Question: {best_answer_similar_question}
+        Instruction: Provide a direct and practical answer to the user's question based on the best answer to a similar question. Start your response with the factual answer, avoiding any greetings or introductory phrases. Use this and speak/Act like an Expert and Answer in less than 60 words. Remember no introductory phases and No Preamble!"""
+    # prompt = f"""
+    #     [Context: This tool assists users by providing answers to agricultural questions based on a database of similar past questions and answers. The response should directly address the user's question using information from the most relevant similar question and answer without unnecessary introductions or fluff.]
+
+    #     [User Question: {user_question}]
+    #     [Similar Question: {similar_question}]
+    #     [Best Answer to Similar Question: {best_answer_similar_question}]
+
+    #     [Response Instruction: Directly answer the user's question using the details from the best answer provided to the similar question. Start immediately with the factual response, avoid greetings, and ensure the answer is concise and to the point.]
+    #     """
+
     # Call to LLaMA model
     output = replicate.run('a16z-infra/llama13b-v2-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5',
                            input={"prompt": prompt,
@@ -94,8 +133,10 @@ if submitted:
         st.text(question)
         st.write("### Similar Question Found:")
         st.text(similar_question)
-        st.write("### Best Answer to Similar Question:")
-        st.text(similar_answer)       
+        # st.write("### Best Answer to Similar Question:")
+        # st.text(similar_answer)      
+            # Using text area for long answers
+        st.text_area("Best Answer to Similar Question:", value=similar_answer, height=150) 
         st.write("### Modified LLM Response:")
 
     
@@ -105,6 +146,9 @@ if submitted:
             similar_question=similar_question,
             best_answer_similar_question=similar_answer,
         )
+
+        # Clean the response to remove any unwanted introductory phrases
+        # response = clean_response(response)
         placeholder = st.empty()
         full_response = ''
         for item in response:
