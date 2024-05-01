@@ -17,17 +17,18 @@ st.title('🦙💬 Llama 2 Agricultural Chatbot')
 
 with st.sidebar:
     st.title('🦙💬 Llama 2 Chatbot')
-    if 'REPLICATE_API_TOKEN' in st.secrets:
-        st.success('API key already provided!', icon='✅')
-        replicate_api = st.secrets['REPLICATE_API_TOKEN']
+    # if 'REPLICATE_API_TOKEN' in st.secrets:
+    #     st.success('API key already provided!', icon='✅')
+    #     replicate_api = st.secrets['REPLICATE_API_TOKEN']
+    replicate_api = "r8_cBgUCGeLqa7K6hXBsUgdMbDGbFPkENn4WiJKk"
     
+    # else:
+    # replicate_api = st.text_input('Enter Replicate API token:', type='password')
+    if not (replicate_api.startswith('r8_') and len(replicate_api)==40):
+        st.warning('Please enter your credentials!', icon='⚠️')
     else:
-        replicate_api = st.text_input('Enter Replicate API token:', type='password')
-        if not (replicate_api.startswith('r8_') and len(replicate_api)==40):
-            st.warning('Please enter your credentials!', icon='⚠️')
-        else:
-            st.success('Proceed to entering your prompt message!', icon='👉')
-        os.environ['REPLICATE_API_TOKEN'] = replicate_api
+        st.success('Proceed to entering your prompt message!', icon='👉')
+    os.environ['REPLICATE_API_TOKEN'] = replicate_api
 
     st.subheader('Models and parameters')
     selected_model = st.sidebar.selectbox('Choose a Llama2 model', ['Llama2-7B', 'Llama2-13B'], key='selected_model')
@@ -53,7 +54,6 @@ def generate_llama_response(user_question, similar_question, best_answer_similar
                                   "top_p": top_p,
                                   "max_length": max_length,
                                   "repetition_penalty": 1})
-
     # Assuming the model returns a dictionary containing the response text
     return output
 
@@ -88,6 +88,15 @@ if submitted:
         similar_question = api_response_json.get('similar_questions')[0]  # Example access
         similar_answer = api_response_json.get('answers')[0]  # Example access
         print(api_response_json)
+
+        # Print the questions and answers for comparison
+        st.write("### User's Question:")
+        st.text(question)
+        st.write("### Similar Question Found:")
+        st.text(similar_question)
+        st.write("### Best Answer to Similar Question:")
+        st.text(similar_answer)       
+        st.write("### Modified LLM Response:")
 
     
     with st.spinner("Thinking..."):
